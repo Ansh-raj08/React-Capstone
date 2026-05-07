@@ -1,35 +1,62 @@
 import { useState } from 'react'
 import TaskItem from './TaskItem'
 
-function TaskList({ tasks, onToggleTask, onDeleteTask }) {
+function TaskList({
+  missions,
+  tasks,
+  onToggleMission,
+  onToggleTask,
+  onDeleteMission,
+  onDeleteTask,
+}) {
   const [showAll, setShowAll] = useState(false)
+  const missionList = missions || tasks || []
+  const handleToggleMission = onToggleMission || onToggleTask
+  const handleDeleteMission = onDeleteMission || onDeleteTask
+  const missionBoard = missionList.slice().sort((leftMission, rightMission) => {
+    if (leftMission.completed !== rightMission.completed) {
+      return Number(leftMission.completed) - Number(rightMission.completed)
+    }
 
-  if (tasks.length === 0) {
+    const leftDueDate = leftMission.dueDate || '9999-12-31'
+    const rightDueDate = rightMission.dueDate || '9999-12-31'
+    if (leftDueDate !== rightDueDate) {
+      return leftDueDate.localeCompare(rightDueDate)
+    }
+
+    return rightMission.createdAt - leftMission.createdAt
+  })
+
+  if (missionBoard.length === 0) {
     return (
       <div className="empty-state">
-        <p>No tasks yet 🚀</p>
-        <span>Add one and start earning XP!</span>
+        <p>No missions queued yet 🚀</p>
+        <span>Add a mission above to start building XP, rank, and momentum.</span>
       </div>
     )
   }
 
-  const visibleTasks = showAll ? tasks : tasks.slice(0, 5)
-  const hasMoreTasks = tasks.length > 5
+  const visibleMissions = showAll ? missionBoard : missionBoard.slice(0, 6)
+  const hasMoreMissions = missionBoard.length > 6
 
   return (
     <div className="task-list-wrap">
+      <div className="task-list-header">
+        <p>Mission board</p>
+        <span>{missionBoard.length} missions</span>
+      </div>
       <ul className="task-list">
-        {visibleTasks.map((task) => (
-        <TaskItem
-          key={task.id}
-          task={task}
-          onToggleTask={onToggleTask}
-          onDeleteTask={onDeleteTask}
-        />
+        {visibleMissions.map((mission) => (
+          <TaskItem
+            key={mission.id}
+            mission={mission}
+            onToggleMission={handleToggleMission}
+            onDeleteMission={handleDeleteMission}
+          />
         ))}
       </ul>
 
-      {hasMoreTasks ? (
+      {hasMoreMissions ? (
         <button
           type="button"
           className="task-history-button"
